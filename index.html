@@ -234,11 +234,9 @@
                     { vi: "Giữ liên lạc nhé!", en: "Keep in touch!", img: "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=300&auto=format&fit=crop&q=80" },
                     { vi: "Chúc bạn một ngày tốt lành!", en: "Have a nice day!", img: "https://images.unsplash.com/photo-1470240731273-7821a6eeb6bd?w=300&auto=format&fit=crop&q=80" },
                     { vi: "Hẹn gặp lại bạn sau.", en: "See you later.", img: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=300&auto=format&fit=crop&q=80" },
-                    
-                    // Dữ liệu mới thêm vào từ bảng tính (Từ câu 11 đến câu 18)
-                    { vi: "Hey, tôi là Bino. Tôi mới ghi danh học ở đây, bác tên là gì nhỉ?", en: "Hey, I'm Bino. I just enrolled here, What's your name?", img: "https://images.unsplash.com/photo-1523240795612-9a054b0db644?w=300&auto=format&fit=crop&q=80" },
-                    { vi: "Chào Bino, tôi là Amy. Rất vui được làm quen với Bác, chào mừng tới trường mới! Bác thấy mọi thứ ở đây thế nào?", en: "Hi Bino, I'm Amy, nice to meet you. Welcome to the university! How are you finding everything so far?", img: "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=300&auto=format&fit=crop&q=80" },
-                    { vi: "Rất vui được làm quen với Amy nha. Cũng OK đấy, tôi đang tập làm quen với đường trong trường.", en: "Nice to meet you too, Amy. It's been pretty good. I'm still getting used to the campus layout though", img: "https://images.unsplash.com/photo-1541339907198-e08756dedf3f?w=300&auto=format&fit=crop&q=80" },
+                    { vi: "Hey, tôi là Hà. Tôi mới ghi danh học ở đây, bác tên là gì nhỉ?", en: "Hey, I'm Hanna. I just enrolled here, What's your name?", img: "https://images.unsplash.com/photo-1523240795612-9a054b0db644?w=300&auto=format&fit=crop&q=80" },
+                    { vi: "Chào Hà, tôi là Cẩm. Rất vui được làm quen với Bác, chào mừng tới trường mới! Bác thấy mọi thứ ở đây thế nào?", en: "Hi Hanna, I'm Camie, nice to meet you. Welcome to the university! How are you finding everything so far?", img: "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=300&auto=format&fit=crop&q=80" },
+                    { vi: "Rất vui được làm quen với Cẩm nha. Cũng OK đấy, tôi đang tập làm quen với đường trong trường.", en: "Nice to meet you too, Amy. It's been pretty good. I'm still getting used to the campus layout though", img: "https://images.unsplash.com/photo-1541339907198-e08756dedf3f?w=300&auto=format&fit=crop&q=80" },
                     { vi: "Ừ, mới đầu cũng hơi rối đó. Mà đừng lo, bác sẽ quen ngay ý mà", en: "Yeah, it can be a bit confusing at first. But don't worry, you'll get the hang of it soon", img: "https://images.unsplash.com/photo-1522202176988-66273c2fd55f?w=300&auto=format&fit=crop&q=80" },
                     { vi: "Cảm ơn bác nha. Mà bác biết đường tới thư viện không? Tôi đang muốn đến thư viện xem", en: "Thanks, I appreciate that. By the way, do you know where the library is? I've been meaning to check it out", img: "https://images.unsplash.com/photo-1521587760476-6c12a4b040da?w=300&auto=format&fit=crop&q=80" },
                     { vi: "Có chứ, bác đi đường kia kìa. Bác cần không, tôi chỉ đường cho?", en: "Sure, it's just down that way. I can show you if you'd like", img: "https://images.unsplash.com/photo-1502920917128-1aa500764cbd?w=300&auto=format&fit=crop&q=80" },
@@ -429,6 +427,7 @@
         let currentSentenceIndex = 0;
         let isFlipped = false;
         let currentSentences = [];
+        let availableVoices = [];
 
         // DOM Elements
         const tabsContainer = document.getElementById('tabsContainer');
@@ -451,9 +450,23 @@
         // Initialize App
         function initApp() {
             loadSavedProgress();
+            initVoices();
             renderTabs();
             loadChapter(currentChapterIndex, false);
             setupEventListeners();
+        }
+
+        // Initialize Voice Synthesis List
+        function initVoices() {
+            if ('speechSynthesis' in window) {
+                const updateVoices = () => {
+                    availableVoices = window.speechSynthesis.getVoices();
+                };
+                updateVoices();
+                if (window.speechSynthesis.onvoiceschanged !== undefined) {
+                    window.speechSynthesis.onvoiceschanged = updateVoices;
+                }
+            }
         }
 
         // Save progress to LocalStorage
@@ -582,18 +595,65 @@
             flashcard.classList.remove('flipped');
         }
 
-        // Text To Speech
+        // Get Native English Voice (Tối ưu ưu tiên giọng bản xứ tự nhiên nhất)
+        function getNativeVoice() {
+            if (!availableVoices || availableVoices.length === 0) {
+                availableVoices = window.speechSynthesis.getVoices();
+            }
+
+            // Danh sách ưu tiên các giọng đọc cao cấp (Google, Natural, Premium, Siri)
+            const preferredVoices = [
+                'Google US English',
+                'Google UK English Female',
+                'Google UK English Male',
+                'Samantha',
+                'Alex',
+                'Karen',
+                'Daniel',
+                'Microsoft Jenny Online (Natural) - English (United States)',
+                'Microsoft Guy Online (Natural) - English (United States)',
+                'Microsoft Aria Online (Natural) - English (United States)'
+            ];
+
+            // 1. Lọc theo danh sách tên giọng ưu tiên
+            for (let name of preferredVoices) {
+                const found = availableVoices.find(v => v.name.includes(name));
+                if (found) return found;
+            }
+
+            // 2. Tìm giọng đọc en-US hoặc en-GB bất kỳ có gắn nhãn Natural/Online/Premium
+            const naturalVoice = availableVoices.find(v => 
+                (v.lang === 'en-US' || v.lang === 'en-GB') && 
+                (v.name.includes('Natural') || v.name.includes('Premium') || v.name.includes('Online'))
+            );
+            if (naturalVoice) return naturalVoice;
+
+            // 3. Fallback sang bất kỳ giọng en-US nào
+            const usVoice = availableVoices.find(v => v.lang === 'en-US');
+            if (usVoice) return usVoice;
+
+            // 4. Fallback sang bất kỳ giọng tiếng Anh nào (en-*)
+            return availableVoices.find(v => v.lang.startsWith('en'));
+        }
+
+        // Text To Speech với giọng bản xứ & tốc độ chuẩn
         function speakEnglish() {
             if (!currentSentences[currentSentenceIndex]) return;
 
             const text = currentSentences[currentSentenceIndex].en;
             if ('speechSynthesis' in window) {
-                window.speechSynthesis.cancel();
+                window.speechSynthesis.cancel(); // Hủy các câu đọc dở trước đó
 
                 const utterance = new SpeechSynthesisUtterance(text);
                 utterance.lang = 'en-US';
-                utterance.rate = 0.9;
-                
+                utterance.rate = 0.95; // Tốc độ tự nhiên, vừa phải
+                utterance.pitch = 1.0;  // Cao độ tự nhiên
+
+                const selectedVoice = getNativeVoice();
+                if (selectedVoice) {
+                    utterance.voice = selectedVoice;
+                }
+
                 window.speechSynthesis.speak(utterance);
             } else {
                 alert("Trình duyệt của bạn không hỗ trợ tính năng phát âm (Text-to-Speech).");
