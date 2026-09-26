@@ -1,0 +1,676 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Luyện Phản Xạ Tiếng Anh - Camreflex</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome Icons CDN -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    },
+                    colors: {
+                        orangeTheme: {
+                            50: '#fff7ed',
+                            100: '#ffedd5',
+                            200: '#fed7aa',
+                            300: '#fdba74',
+                            400: '#fb923c',
+                            500: '#f97316',
+                            600: '#ea580c',
+                            700: '#c2410c',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    
+    <style>
+        /* Custom scrollbar for horizontal tabs */
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .no-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+
+        /* 3D Flip Animation Styles */
+        .perspective-1000 {
+            perspective: 1000px;
+        }
+        .transform-style-3d {
+            transform-style: preserve-3d;
+        }
+        .backface-hidden {
+            backface-visibility: hidden;
+            -webkit-backface-visibility: hidden;
+        }
+        .rotate-y-180 {
+            transform: rotateY(180deg);
+        }
+        
+        .card-inner {
+            transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .flipped {
+            transform: rotateY(180deg);
+        }
+    </style>
+</head>
+<body class="bg-orangeTheme-50/60 text-slate-800 font-sans min-h-screen flex flex-col justify-between selection:bg-orangeTheme-100 selection:text-orangeTheme-800">
+
+    <!-- Header -->
+    <header class="bg-white border-b border-orangeTheme-200/80 sticky top-0 z-20 shadow-sm">
+        <div class="max-w-5xl mx-auto px-4 py-3 flex items-center justify-between">
+            <div class="flex items-center space-x-3">
+                <div class="w-10 h-10 rounded-xl bg-orangeTheme-500 text-white flex items-center justify-center font-bold text-xl shadow-md shadow-orangeTheme-200">
+                    <i class="fa-solid fa-bolt"></i>
+                </div>
+                <div>
+                    <h1 class="font-bold text-slate-800 text-lg leading-tight">Camreflex</h1>
+                    <p class="text-xs text-orangeTheme-600 font-medium">Luyện Phản Xạ Tiếng Anh 12 Chương</p>
+                </div>
+            </div>
+            
+            <div class="flex items-center space-x-2">
+                <button id="resetProgressBtn" title="Đặt lại tiến độ" class="text-xs px-3 py-1.5 rounded-lg border border-orangeTheme-200 text-orangeTheme-700 bg-orangeTheme-50/50 hover:bg-orangeTheme-100 transition duration-200 flex items-center gap-1.5">
+                    <i class="fa-solid fa-rotate-right text-orangeTheme-400"></i>
+                    <span class="hidden sm:inline">Đặt lại tiến độ</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- 12 Horizontal Tabs Scrollable with light orange borders/theme -->
+        <div class="bg-orangeTheme-100/50 border-t border-orangeTheme-200/60 backdrop-blur-sm">
+            <div class="max-w-5xl mx-auto px-2 sm:px-4">
+                <div id="tabsContainer" class="flex overflow-x-auto no-scrollbar py-2 space-x-2 scroll-smooth">
+                    <!-- Tabs will be generated dynamically by JS -->
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="flex-grow flex items-center justify-center p-4 sm:p-6 max-w-4xl mx-auto w-full">
+        <div class="w-full flex flex-col items-center">
+            
+            <!-- Info & Controls Bar -->
+            <div class="w-full max-w-xl flex items-center justify-between mb-3 px-1">
+                <!-- Progress counter -->
+                <div class="flex items-center space-x-2">
+                    <span class="text-xs font-semibold px-3 py-1 rounded-full bg-orangeTheme-200/70 text-orangeTheme-800 border border-orangeTheme-300/50" id="chapterBadge">Chương 1</span>
+                    <span class="text-sm font-medium text-slate-600" id="progressText">Câu 1 / 10</span>
+                </div>
+
+                <!-- Action Controls -->
+                <div class="flex items-center space-x-2">
+                    <button id="shuffleBtn" class="p-2 text-slate-600 hover:text-orangeTheme-600 hover:bg-orangeTheme-100/60 rounded-lg transition duration-200" title="Xáo trộn câu trong chương này">
+                        <i class="fa-solid fa-shuffle"></i>
+                    </button>
+                    <button id="speakBtn" class="p-2 text-slate-600 hover:text-orangeTheme-600 hover:bg-orangeTheme-100/60 rounded-lg transition duration-200" title="Phát âm tiếng Anh">
+                        <i class="fa-solid fa-volume-high text-lg"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Flashcard 3D Perspective Wrapper -->
+            <div class="w-full max-w-xl h-80 sm:h-96 perspective-1000 cursor-pointer group" id="cardWrapper">
+                <!-- Inner Card that rotates -->
+                <div id="flashcard" class="card-inner relative w-full h-full transform-style-3d shadow-lg rounded-2xl border-2 border-orangeTheme-200 bg-white hover:border-orangeTheme-400 transition-colors">
+                    
+                    <!-- Front Face (Tiếng Việt) -->
+                    <div class="absolute inset-0 w-full h-full backface-hidden rounded-2xl p-5 sm:p-6 flex flex-col justify-between items-center text-center bg-gradient-to-b from-white to-orangeTheme-50/30">
+                        <div class="w-full flex justify-between items-center text-xs font-semibold uppercase tracking-wider text-orangeTheme-700">
+                            <span><i class="fa-solid fa-language text-orangeTheme-500 mr-1"></i> Tiếng Việt</span>
+                            <span class="text-orangeTheme-400 group-hover:text-orangeTheme-600 transition-colors"><i class="fa-solid fa-rotate"></i> Chạm để lật</span>
+                        </div>
+
+                        <!-- Image & Vietnamese Sentence -->
+                        <div class="my-auto w-full flex flex-col items-center gap-3">
+                            <div class="w-28 h-28 sm:w-36 sm:h-36 rounded-xl overflow-hidden shadow-inner border border-orangeTheme-200/80 bg-orangeTheme-100 flex items-center justify-center">
+                                <img id="cardImage" src="" alt="Situation Illustration" class="w-full h-full object-cover transition-opacity duration-300" onerror="this.src='https://placehold.co/300x300/ffedd5/c2410c?text=Camreflex';">
+                            </div>
+                            <h2 id="vietnameseText" class="text-lg sm:text-xl font-bold text-slate-800 leading-snug px-2">
+                                Đang tải câu hỏi...
+                            </h2>
+                        </div>
+
+                        <div class="text-xs text-orangeTheme-700/70 flex items-center gap-1 font-medium">
+                            <i class="fa-regular fa-lightbulb text-amber-500"></i>
+                            <span>Nghĩ câu Tiếng Anh trong đầu trước khi lật</span>
+                        </div>
+                    </div>
+
+                    <!-- Back Face (Tiếng Anh) -->
+                    <div class="absolute inset-0 w-full h-full backface-hidden rotate-y-180 rounded-2xl p-6 sm:p-8 flex flex-col justify-between items-center text-center bg-gradient-to-b from-orangeTheme-500 to-orangeTheme-600 text-white shadow-inner">
+                        <div class="w-full flex justify-between items-center text-xs font-semibold uppercase tracking-wider text-orangeTheme-100">
+                            <span><i class="fa-solid fa-globe mr-1"></i> Tiếng Anh</span>
+                            <span class="text-orangeTheme-200"><i class="fa-solid fa-rotate"></i> Chạm để lật lại</span>
+                        </div>
+
+                        <!-- English Sentence -->
+                        <div class="my-auto px-2">
+                            <h2 id="englishText" class="text-xl sm:text-2xl font-bold text-white leading-relaxed sm:leading-relaxed tracking-wide">
+                                Loading sentence...
+                            </h2>
+                        </div>
+
+                        <div class="flex items-center gap-2">
+                            <button id="cardSpeakBtn" class="px-4 py-2 rounded-full bg-white/20 hover:bg-white/30 text-white text-xs font-semibold backdrop-blur-sm transition flex items-center gap-2 border border-white/20">
+                                <i class="fa-solid fa-volume-high"></i> Nghe phát âm
+                            </button>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+            <!-- Controls (Prev / Flip / Next) -->
+            <div class="w-full max-w-xl flex items-center justify-between gap-3 mt-6">
+                <button id="prevBtn" class="flex-1 py-3 px-4 rounded-xl bg-white border border-orangeTheme-200 hover:bg-orangeTheme-100/50 hover:border-orangeTheme-300 active:scale-95 text-slate-700 font-medium shadow-sm transition duration-150 flex items-center justify-center gap-2">
+                    <i class="fa-solid fa-arrow-left text-orangeTheme-500"></i>
+                    <span>Câu trước</span>
+                </button>
+
+                <button id="flipBtn" class="flex-1 py-3 px-4 rounded-xl bg-orangeTheme-500 hover:bg-orangeTheme-600 active:scale-95 text-white font-semibold shadow-md shadow-orangeTheme-200 transition duration-150 flex items-center justify-center gap-2">
+                    <i class="fa-solid fa-arrows-rotate"></i>
+                    <span>Lật thẻ</span>
+                </button>
+
+                <button id="nextBtn" class="flex-1 py-3 px-4 rounded-xl bg-white border border-orangeTheme-200 hover:bg-orangeTheme-100/50 hover:border-orangeTheme-300 active:scale-95 text-slate-700 font-medium shadow-sm transition duration-150 flex items-center justify-center gap-2">
+                    <span>Câu tiếp</span>
+                    <i class="fa-solid fa-arrow-right text-orangeTheme-500"></i>
+                </button>
+            </div>
+
+            <!-- Keyboard shortcut hint -->
+            <div class="mt-4 text-xs text-slate-400 hidden sm:flex items-center gap-3">
+                <span><kbd class="px-1.5 py-0.5 bg-orangeTheme-100 text-orangeTheme-800 rounded font-medium">Space</kbd> / Click: Lật thẻ</span>
+                <span><kbd class="px-1.5 py-0.5 bg-orangeTheme-100 text-orangeTheme-800 rounded font-medium">←</kbd> Câu trước</span>
+                <span><kbd class="px-1.5 py-0.5 bg-orangeTheme-100 text-orangeTheme-800 rounded font-medium">→</kbd> Câu tiếp</span>
+            </div>
+
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-white border-t border-orangeTheme-200/80 py-3 text-center text-xs text-slate-500">
+        <p>Camreflex - Ghi nhớ phản xạ nhanh bằng hình ảnh & thẻ lật mỗi ngày.</p>
+    </footer>
+
+    <script>
+        // Data structure for 12 Chapters with rich communication sentences and situational images
+        const chaptersData = [
+            {
+                id: 1,
+                title: "Chương 1: Chào Hỏi & Giới Thiệu",
+                sentences: [
+                    { vi: "Rất vui được gặp bạn.", en: "Nice to meet you.", img: "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=300&auto=format&fit=crop&q=80" },
+                    { vi: "Dạo này công việc thế nào?", en: "How has work been lately?", img: "https://images.unsplash.com/photo-1522071820081-009f0129c71c?w=300&auto=format&fit=crop&q=80" },
+                    { vi: "Bạn đến từ đâu?", en: "Where are you from?", img: "https://images.unsplash.com/photo-1526778548025-fa2f459cd5c1?w=300&auto=format&fit=crop&q=80" },
+                    { vi: "Tôi đến từ Việt Nam.", en: "I'm from Vietnam.", img: "https://images.unsplash.com/photo-1509030450996-93f2e3d87058?w=300&auto=format&fit=crop&q=80" },
+                    { vi: "Bạn làm nghề gì?", en: "What do you do for a living?", img: "https://images.unsplash.com/photo-1498050108023-c5249f4df085?w=300&auto=format&fit=crop&q=80" },
+                    { vi: "Tôi là kĩ sư phần mềm.", en: "I'm a software engineer.", img: "https://images.unsplash.com/photo-1517694712202-14dd9538aa97?w=300&auto=format&fit=crop&q=80" },
+                    { vi: "Hôm nay của bạn thế nào?", en: "How was your day today?", img: "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=300&auto=format&fit=crop&q=80" },
+                    { vi: "Giữ liên lạc nhé!", en: "Keep in touch!", img: "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=300&auto=format&fit=crop&q=80" },
+                    { vi: "Chúc bạn một ngày tốt lành!", en: "Have a nice day!", img: "https://images.unsplash.com/photo-1470240731273-7821a6eeb6bd?w=300&auto=format&fit=crop&q=80" },
+                    { vi: "Hẹn gặp lại bạn sau.", en: "See you later.", img: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=300&auto=format&fit=crop&q=80" }
+                ]
+            },
+            {
+                id: 2,
+                title: "Chương 2: Hỏi Đường & Địa Điểm",
+                sentences: [
+                    { vi: "Cho hỏi trạm xe buýt gần nhất ở đâu?", en: "Where is the nearest bus stop?", img: "https://images.unsplash.com/photo-1570125909232-eb263c188f7e?w=300&auto=format&fit=crop&q=80" },
+                    { vi: "Làm sao để đến sân bay?", en: "How do I get to the airport?", img: "https://images.unsplash.com/photo-1436491865332-7a61a109cc05?w=300&auto=format&fit=crop&q=80" },
+                    { vi: "Đi thẳng rồi rẽ trái.", en: "Go straight and then turn left.", img: "https://images.unsplash.com/photo-1502920917128-1aa500764cbd?w=300&auto=format&fit=crop&q=80" },
+                    { vi: "Có xa đây không?", en: "Is it far from here?", img: "https://images.unsplash.com/photo-1469854523086-cc02fe5d8800?w=300&auto=format&fit=crop&q=80" },
+                    { vi: "Mất khoảng 10 phút đi bộ.", en: "It takes about 10 minutes on foot.", img: "https://images.unsplash.com/photo-1476480862126-209bfaa8edc8?w=300&auto=format&fit=crop&q=80" },
+                    { vi: "Tôi bị lạc rồi, bạn giúp tôi được không?", en: "I'm lost, can you help me?", img: "https://images.unsplash.com/photo-1526772662000-3f88f10405ff?w=300&auto=format&fit=crop&q=80" },
+                    { vi: "Nó nằm ở phía bên phải đường.", en: "It's on the right side of the street.", img: "https://images.unsplash.com/photo-1519501025264-65ba15a82390?w=300&auto=format&fit=crop&q=80" },
+                    { vi: "Bạn có thể chỉ đường trên bản đồ cho tôi không?", en: "Can you show me the way on the map?", img: "https://images.unsplash.com/photo-1524661135-423995f22d0b?w=300&auto=format&fit=crop&q=80" },
+                    { vi: "Nó nằm ngay đối diện ngân hàng.", en: "It's right opposite the bank.", img: "https://images.unsplash.com/photo-1541354329998-f4d9a9f9297f?w=300&auto=format&fit=crop&q=80" },
+                    { vi: "Cảm ơn vì đã chỉ đường!", en: "Thanks for the directions!", img: "https://images.unsplash.com/photo-1499209974431-9dac3ada00d7?w=300&auto=format&fit=crop&q=80" }
+                ]
+            },
+            {
+                id: 3,
+                title: "Chương 3: Nhà Hàng & Gọi Món",
+                sentences: [
+                    { vi: "Cho tôi xem thực đơn được không?", en: "May I see the menu, please?", img: "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=300&auto=format&fit=crop&q=80" },
+                    { vi: "Bạn có giới thiệu món nào ngon không?", en: "What do you recommend?", img: "https://images.unsplash.com/photo-1555396273-367ea4eb4db5?w=300&auto=format&fit=crop&q=80" },
+                    { vi: "Tôi muốn gọi món này.", en: "I would like to order this dish.", img: "https://images.unsplash.com/photo-1544025162-d76694265947?w=300&auto=format&fit=crop&q=80" },
+                    { vi: "Món này có cay không?", en: "Is this dish spicy?", img: "https://images.unsplash.com/photo-1563379091339-03b21ab4a4f8?w=300&auto=format&fit=crop&q=80" },
+                    { vi: "Cho tôi một ly nước lọc nhé.", en: "Just a glass of water for me, please.", img: "https://images.unsplash.com/photo-1548839140-29a749e1cf4e?w=300&auto=format&fit=crop&q=80" },
+                    { vi: "Chúng tôi đã sẵn sàng gọi món.", en: "We are ready to order.", img: "https://images.unsplash.com/photo-1552566626-52f8b828add9?w=300&auto=format&fit=crop&q=80" },
+                    { vi: "Cho tôi tính tiền nhé.", en: "Check, please.", img: "https://images.unsplash.com/photo-1556742049-0a670f4a45a7?w=300&auto=format&fit=crop&q=80" },
+                    { vi: "Thanh toán bằng thẻ được không?", en: "Can I pay by credit card?", img: "https://images.unsplash.com/photo-1556742031-c6961e8560d0?w=300&auto=format&fit=crop&q=80" },
+                    { vi: "Món ăn rất ngon, cảm ơn!", en: "The food was delicious, thank you!", img: "https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=300&auto=format&fit=crop&q=80" },
+                    { vi: "Giữ lại tiền thừa nhé.", en: "Keep the change.", img: "https://images.unsplash.com/photo-1526304640581-d334cdbbf45e?w=300&auto=format&fit=crop&q=80" }
+                ]
+            },
+            {
+                id: 4,
+                title: "Chương 4: Mua Sắm & Giá Cả",
+                sentences: [
+                    { vi: "Cái này giá bao nhiêu?", en: "How much is this?", img: "https://images.unsplash.com/photo-1472851294608-062f824d29cc?w=300&auto=format&fit=crop&q=80" },
+                    { vi: "Nó hơi đắt một chút.", en: "It's a bit expensive.", img: "https://images.unsplash.com/photo-1607082348824-0a96f2a4b9da?w=300&auto=format&fit=crop&q=80" },
+                    { vi: "Bạn có giảm giá không?", en: "Can you give me a discount?", img: "https://images.unsplash.com/photo-1526178613552-2b45c6c302f0?w=300&auto=format&fit=crop&q=80" },
+                    { vi: "Tôi có thể thử cái này không?", en: "Can I try this on?", img: "https://images.unsplash.com/photo-1441986300917-64674bd600d8?w=300&auto=format&fit=crop&q=80" },
+                    { vi: "Phòng thay đồ ở đâu?", en: "Where is the fitting room?", img: "https://images.unsplash.com/photo-1489987707025-afc232f7ea0f?w=300&auto=format&fit=crop&q=80" },
+                    { vi: "Bạn có cái này size lớn hơn không?", en: "Do you have this in a larger size?", img: "https://images.unsplash.com/photo-1512436991641-6745cdb1723f?w=300&auto=format&fit=crop&q=80" },
+                    { vi: "Tôi sẽ lấy cái này.", en: "I'll take this one.", img: "https://images.unsplash.com/photo-1555529669-e69e7aa0ba9a?w=300&auto=format&fit=crop&q=80" },
+                    { vi: "Bạn có nhận tiền mặt không?", en: "Do you accept cash?", img: "https://images.unsplash.com/photo-1559526324-4b87b5e36e44?w=300&auto=format&fit=crop&q=80" },
+                    { vi: "Cho tôi xin hóa đơn nhé.", en: "Can I get a receipt, please?", img: "https://images.unsplash.com/photo-1554224155-8d04cb21cd6c?w=300&auto=format&fit=crop&q=80" },
+                    { vi: "Tôi chỉ xem qua thôi, cảm ơn.", en: "I'm just browsing, thank you.", img: "https://images.unsplash.com/photo-1483985988355-763728e1935b?w=300&auto=format&fit=crop&q=80" }
+                ]
+            },
+            {
+                id: 5,
+                title: "Chương 5: Khách Sạn & Đặt Phòng",
+                sentences: [
+                    { vi: "Tôi muốn nhận phòng.", en: "I'd like to check in, please.", img: "https://images.unsplash.com/photo-1566073771259-6a8506099945?w=300&auto=format&fit=crop&q=80" },
+                    { vi: "Tôi đã đặt phòng trước rồi.", en: "I have a reservation.", img: "https://images.unsplash.com/photo-1582719508461-905c673771fd?w=300&auto=format&fit=crop&q=80" },
+                    { vi: "Bữa sáng có bao gồm không?", en: "Is breakfast included?", img: "https://images.unsplash.com/photo-1533089860892-a7c6f0a88666?w=300&auto=format&fit=crop&q=80" },
+                    { vi: "Mật khẩu Wi-Fi là gì?", en: "What is the Wi-Fi password?", img: "https://images.unsplash.com/photo-1563986768609-322da13575f3?w=300&auto=format&fit=crop&q=80" },
+                    { vi: "Mấy giờ phải trả phòng?", en: "What time is check-out?", img: "https://images.unsplash.com/photo-1521783988139-89397d761dce?w=300&auto=format&fit=crop&q=80" },
+                    { vi: "Cho tôi xin thêm một cái khăn tắm.", en: "Can I have an extra towel, please?", img: "https://images.unsplash.com/photo-1616046229478-9901c5536a45?w=300&auto=format&fit=crop&q=80" },
+                    { vi: "Điều hòa phòng tôi bị hỏng rồi.", en: "The air conditioner in my room is broken.", img: "https://images.unsplash.com/photo-1585338107529-13afc5f02586?w=300&auto=format&fit=crop&q=80" },
+                    { vi: "Bạn có thể gọi taxi giúp tôi được không?", en: "Could you call a taxi for me?", img: "https://images.unsplash.com/photo-1511527667028-02821217e2ef?w=300&auto=format&fit=crop&q=80" },
+                    { vi: "Tôi muốn gửi hành lý ở đây.", en: "I'd like to leave my luggage here.", img: "https://images.unsplash.com/photo-1553531384-cc64ac80f931?w=300&auto=format&fit=crop&q=80" },
+                    { vi: "Cảm ơn vì đã phục vụ chu đáo.", en: "Thank you for the great service.", img: "https://images.unsplash.com/photo-1540555700478-4be289fbecef?w=300&auto=format&fit=crop&q=80" }
+                ]
+            },
+            {
+                id: 6,
+                title: "Chương 6: Công Việc & Văn Phòng",
+                sentences: [
+                    { vi: "Khi nào cuộc họp bắt đầu?", en: "When does the meeting start?", img: "https://images.unsplash.com/photo-1517245386807-bb43f82c33c4?w=300&auto=format&fit=crop&q=80" },
+                    { vi: "Tôi sẽ gửi email cho bạn sau.", en: "I will send you an email later.", img: "https://images.unsplash.com/photo-1586281380349-632531db7ed4?w=300&auto=format&fit=crop&q=80" },
+                    { vi: "Hạn chót của dự án này là khi nào?", en: "When is the deadline for this project?", img: "https://images.unsplash.com/photo-1506784983877-45594efa4cbe?w=300&auto=format&fit=crop&q=80" },
+                    { vi: "Bạn có thể giải thích lại điểm này được không?", en: "Could you clarify this point again?", img: "https://images.unsplash.com/photo-1531482615713-2afd69097998?w=300&auto=format&fit=crop&q=80" },
+                    { vi: "Tôi đồng ý với ý kiến của bạn.", en: "I agree with your opinion.", img: "https://images.unsplash.com/photo-1521737604893-d14cc237f11d?w=300&auto=format&fit=crop&q=80" },
+                    { vi: "Chúng ta cần thảo luận thêm về vấn đề này.", en: "We need to discuss this issue further.", img: "https://images.unsplash.com/photo-1556761175-5973dc0f32e7?w=300&auto=format&fit=crop&q=80" },
+                    { vi: "Tôi đang làm việc báo cáo.", en: "I'm working on the report.", img: "https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=300&auto=format&fit=crop&q=80" },
+                    { vi: "Cảm ơn sự hợp tác của bạn.", en: "Thank you for your cooperation.", img: "https://images.unsplash.com/photo-1560250097-0b93528c311a?w=300&auto=format&fit=crop&q=80" },
+                    { vi: "Hôm nay tôi phải làm thêm giờ.", en: "I have to work overtime today.", img: "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=300&auto=format&fit=crop&q=80" },
+                    { vi: "Chúc một tuần làm việc hiệu quả!", en: "Have a productive week!", img: "https://images.unsplash.com/photo-1499750310107-5fef28a66643?w=300&auto=format&fit=crop&q=80" }
+                ]
+            },
+            {
+                id: 7,
+                title: "Chương 7: Thời Tiết & Trò Chuyện",
+                sentences: [
+                    { vi: "Hôm nay thời tiết thế nào?", en: "How is the weather today?", img: "https://images.unsplash.com/photo-1504608524841-42fe6f032b4b?w=300&auto=format&fit=crop&q=80" },
+                    { vi: "Trời nắng đẹp cả ngày.", en: "It's nice and sunny all day.", img: "https://images.unsplash.com/photo-1470240731273-7821a6eeb6bd?w=300&auto=format&fit=crop&q=80" },
+                    { vi: "Trời hình như sắp mưa rồi.", en: "It looks like it's going to rain.", img: "https://images.unsplash.com/photo-1515694346937-94d85e41e6f0?w=300&auto=format&fit=crop&q=80" },
+                    { vi: "Hôm nay lạnh thật đấy!", en: "It's really cold today!", img: "https://images.unsplash.com/photo-1483664852095-d6cc6870702d?w=300&auto=format&fit=crop&q=80" },
+                    { vi: "Đừng quên mang theo ô nhé.", en: "Don't forget to bring an umbrella.", img: "https://images.unsplash.com/photo-1511632765486-a01980e01a18?w=300&auto=format&fit=crop&q=80" },
+                    { vi: "Dạo này thời tiết thất thường quá.", en: "The weather has been unpredictable lately.", img: "https://images.unsplash.com/photo-1534088568595-a066f410bcda?w=300&auto=format&fit=crop&q=80" },
+                    { vi: "Tôi thích mùa thu nhất.", en: "I like autumn the best.", img: "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=300&auto=format&fit=crop&q=80" },
+                    { vi: "Nhiệt độ hôm nay là bao nhiêu?", en: "What's the temperature today?", img: "https://images.unsplash.com/photo-1592210454359-9043f067919b?w=300&auto=format&fit=crop&q=80" },
+                    { vi: "Trời nóng quá, đi uống nước thôi.", en: "It's so hot, let's get something to drink.", img: "https://images.unsplash.com/photo-1513558161293-cdaf765ed2fd?w=300&auto=format&fit=crop&q=80" },
+                    { vi: "Thời tiết cuối tuần này tuyệt thật!", en: "The weather this weekend is great!", img: "https://images.unsplash.com/photo-1473116763249-2faaef81ccda?w=300&auto=format&fit=crop&q=80" }
+                ]
+            },
+            {
+                id: 8,
+                title: "Chương 8: Sở Thích & Giải Trí",
+                sentences: [
+                    { vi: "Lúc rảnh rỗi bạn thích làm gì?", en: "What do you like to do in your free time?", img: "https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?w=300&auto=format&fit=crop&q=80" },
+                    { vi: "Tôi rất thích nghe nhạc và đọc sách.", en: "I really enjoy listening to music and reading books.", img: "https://images.unsplash.com/photo-1497633762265-9d179a990aa6?w=300&auto=format&fit=crop&q=80" },
+                    { vi: "Bạn có chơi thể thao không?", en: "Do you play any sports?", img: "https://images.unsplash.com/photo-1461896836934-ffe607ba8211?w=300&auto=format&fit=crop&q=80" },
+                    { vi: "Tôi thỉnh thoảng đi đá bóng cuối tuần.", en: "I sometimes play football on weekends.", img: "https://images.unsplash.com/photo-1508098682722-e99c43a406b2?w=300&auto=format&fit=crop&q=80" },
+                    { vi: "Bộ phim yêu thích của bạn là gì?", en: "What's your favorite movie?", img: "https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?w=300&auto=format&fit=crop&q=80" },
+                    { vi: "Cuối tuần này bạn có kế hoạch gì chưa?", en: "Do you have any plans for this weekend?", img: "https://images.unsplash.com/photo-1517457373958-b7bdd4587205?w=300&auto=format&fit=crop&q=80" },
+                    { vi: "Chúng ta đi xem phim đi!", en: "Let's go to the movies!", img: "https://images.unsplash.com/photo-1517604931442-7e0c8ed2963c?w=300&auto=format&fit=crop&q=80" },
+                    { vi: "Tôi thích đi du lịch khám phá nơi mới.", en: "I love traveling to explore new places.", img: "https://images.unsplash.com/photo-1488646953014-85cb44e25828?w=300&auto=format&fit=crop&q=80" },
+                    { vi: "Bạn chơi nhạc cụ nào không?", en: "Do you play any musical instruments?", img: "https://images.unsplash.com/photo-1510915361894-db8b60106cb1?w=300&auto=format&fit=crop&q=80" },
+                    { vi: "Nghe có vẻ thú vị đấy!", en: "That sounds interesting!", img: "https://images.unsplash.com/photo-1529156069898-49953e39b3ac?w=300&auto=format&fit=crop&q=80" }
+                ]
+            },
+            {
+                id: 9,
+                title: "Chương 9: Sức Khỏe & Cấp Cứu",
+                sentences: [
+                    { vi: "Tôi cảm thấy không được khỏe.", en: "I don't feel very well.", img: "https://images.unsplash.com/photo-1584515979956-d9f6e5d09982?w=300&auto=format&fit=crop&q=80" },
+                    { vi: "Tôi bị đau đầu từ sáng.", en: "I've had a headache since morning.", img: "https://images.unsplash.com/photo-1544367567-0f2fcb009e0b?w=300&auto=format&fit=crop&q=80" },
+                    { vi: "Hiệu thuốc gần nhất ở đâu?", en: "Where is the nearest pharmacy?", img: "https://images.unsplash.com/photo-1587854692152-cbe660dbde88?w=300&auto=format&fit=crop&q=80" },
+                    { vi: "Bạn nên đi khám bác sĩ.", en: "You should see a doctor.", img: "https://images.unsplash.com/photo-1532938911079-1b06ac7ceec7?w=300&auto=format&fit=crop&q=80" },
+                    { vi: "Tôi bị dị ứng với hải sản.", en: "I'm allergic to seafood.", img: "https://images.unsplash.com/photo-1534422298391-e4f8c172dddb?w=300&auto=format&fit=crop&q=80" },
+                    { vi: "Uống thuốc này ngày 2 lần.", en: "Take this medicine twice a day.", img: "https://images.unsplash.com/photo-1471864190281-a93a3070b6de?w=300&auto=format&fit=crop&q=80" },
+                    { vi: "Hãy gọi cấp cứu giúp tôi!", en: "Please call an ambulance!", img: "https://images.unsplash.com/photo-1587745416684-47953f16f02f?w=300&auto=format&fit=crop&q=80" },
+                    { vi: "Tôi cần nghỉ ngơi một chút.", en: "I need to rest for a bit.", img: "https://images.unsplash.com/photo-1511295742362-92c96b124e52?w=300&auto=format&fit=crop&q=80" },
+                    { vi: "Chúc bạn mau khỏe nhé!", en: "Get well soon!", img: "https://images.unsplash.com/photo-1513151233558-d860c5398176?w=300&auto=format&fit=crop&q=80" },
+                    { vi: "Tôi thấy đỡ hơn nhiều rồi.", en: "I feel much better now.", img: "https://images.unsplash.com/photo-1506126613408-eca07ce68773?w=300&auto=format&fit=crop&q=80" }
+                ]
+            },
+            {
+                id: 10,
+                title: "Chương 10: Cảm Xúc & Ý Kiến",
+                sentences: [
+                    { vi: "Tôi hoàn toàn đồng ý.", en: "I completely agree.", img: "https://images.unsplash.com/photo-1551836022-d5d88e9218df?w=300&auto=format&fit=crop&q=80" },
+                    { vi: "Tôi không chắc về điều đó.", en: "I'm not sure about that.", img: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=300&auto=format&fit=crop&q=80" },
+                    { vi: "Thật tuyệt vời!", en: "That's wonderful!", img: "https://images.unsplash.com/photo-1492684223066-81342ee5ff30?w=300&auto=format&fit=crop&q=80" },
+                    { vi: "Thật tiếc khi nghe điều đó.", en: "I'm sorry to hear that.", img: "https://images.unsplash.com/photo-1499209974431-9dac3ada00d7?w=300&auto=format&fit=crop&q=80" },
+                    { vi: "Theo ý kiến của tôi...", en: "In my opinion...", img: "https://images.unsplash.com/photo-1455390582262-044cdead277a?w=300&auto=format&fit=crop&q=80" },
+                    { vi: "Đừng lo lắng quá!", en: "Don't worry too much!", img: "https://images.unsplash.com/photo-1469571486292-0ba58a3f068b?w=300&auto=format&fit=crop&q=80" },
+                    { vi: "Tôi rất hào hứng về chuyến đi.", en: "I'm really excited about the trip.", img: "https://images.unsplash.com/photo-1503220317375-aaad61436b1b?w=300&auto=format&fit=crop&q=80" },
+                    { vi: "Không có gì phải lo cả.", en: "There's nothing to worry about.", img: "https://images.unsplash.com/photo-1470240731273-7821a6eeb6bd?w=300&auto=format&fit=crop&q=80" },
+                    { vi: "Bạn làm tốt lắm!", en: "You did a great job!", img: "https://images.unsplash.com/photo-1531497865144-0464ef8fb9a9?w=300&auto=format&fit=crop&q=80" },
+                    { vi: "Điều đó thật không hợp lý.", en: "That doesn't make sense.", img: "https://images.unsplash.com/photo-1457369804613-52c61a468e7d?w=300&auto=format&fit=crop&q=80" }
+                ]
+            },
+            {
+                id: 11,
+                title: "Chương 11: Điện Thoại & Hẹn Hò",
+                sentences: [
+                    { vi: "Alo, ai đang gọi đấy ạ?", en: "Hello, who is calling?", img: "https://images.unsplash.com/photo-1534536281715-e28d76689b4d?w=300&auto=format&fit=crop&q=80" },
+                    { vi: "Tôi có thể nói chuyện với John được không?", en: "May I speak to John, please?", img: "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=300&auto=format&fit=crop&q=80" },
+                    { vi: "Giữ máy một chút nhé.", en: "Hold on a moment, please.", img: "https://images.unsplash.com/photo-1522071820081-009f0129c71c?w=300&auto=format&fit=crop&q=80" },
+                    { vi: "Sóng ở đây yếu quá.", en: "The signal is very weak here.", img: "https://images.unsplash.com/photo-1563986768609-322da13575f3?w=300&auto=format&fit=crop&q=80" },
+                    { vi: "Bạn có thể nói to hơn một chút không?", en: "Could you speak a bit louder?", img: "https://images.unsplash.com/photo-1577563908411-5077b6dc7624?w=300&auto=format&fit=crop&q=80" },
+                    { vi: "Mấy giờ chúng ta gặp nhau?", en: "What time shall we meet?", img: "https://images.unsplash.com/photo-1508962914676-134849a727f0?w=300&auto=format&fit=crop&q=80" },
+                    { vi: "Hẹn gặp bạn lúc 7 giờ tối nhé.", en: "Let's meet at 7 PM.", img: "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=300&auto=format&fit=crop&q=80" },
+                    { vi: "Tôi sẽ gọi lại cho bạn sau.", en: "I'll call you back later.", img: "https://images.unsplash.com/photo-1512428559087-560fa5ceab42?w=300&auto=format&fit=crop&q=80" },
+                    { vi: "Cảm ơn vì đã gọi!", en: "Thanks for calling!", img: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=300&auto=format&fit=crop&q=80" },
+                    { vi: "Xin lỗi vì gọi trễ thế này.", en: "Sorry for calling so late.", img: "https://images.unsplash.com/photo-1541199249251-f713e6145474?w=300&auto=format&fit=crop&q=80" }
+                ]
+            },
+            {
+                id: 12,
+                title: "Chương 12: Nhờ Vả & Cảm Ơn",
+                sentences: [
+                    { vi: "Bạn có thể giúp tôi một chút được không?", en: "Could you give me a hand?", img: "https://images.unsplash.com/photo-1469571486292-0ba58a3f068b?w=300&auto=format&fit=crop&q=80" },
+                    { vi: "Cảm ơn bạn rất nhiều vì đã giúp đỡ!", en: "Thank you so much for your help!", img: "https://images.unsplash.com/photo-1531497865144-0464ef8fb9a9?w=300&auto=format&fit=crop&q=80" },
+                    { vi: "Không có gì đâu!", en: "You're very welcome!", img: "https://images.unsplash.com/photo-1499209974431-9dac3ada00d7?w=300&auto=format&fit=crop&q=80" },
+                    { vi: "Làm phiền bạn một chút được không?", en: "Sorry to bother you for a second.", img: "https://images.unsplash.com/photo-1577563908411-5077b6dc7624?w=300&auto=format&fit=crop&q=80" },
+                    { vi: "Tôi rất biết ơn vì điều này.", en: "I really appreciate this.", img: "https://images.unsplash.com/photo-1517048676732-d65bc937f952?w=300&auto=format&fit=crop&q=80" },
+                    { vi: "Bạn thật tốt bụng!", en: "That's very kind of you!", img: "https://images.unsplash.com/photo-1529156069898-49953e39b3ac?w=300&auto=format&fit=crop&q=80" },
+                    { vi: "Tôi có thể nhờ bạn việc này không?", en: "Can I ask you a favor?", img: "https://images.unsplash.com/photo-1521791136064-7986c2920216?w=300&auto=format&fit=crop&q=80" },
+                    { vi: "Đừng bận tâm nhé.", en: "Don't mention it.", img: "https://images.unsplash.com/photo-1488426862026-3ee34a7d66df?w=300&auto=format&fit=crop&q=80" },
+                    { vi: "Rất sẵn lòng giúp bạn.", en: "Glad to help you.", img: "https://images.unsplash.com/photo-1560250097-0b93528c311a?w=300&auto=format&fit=crop&q=80" },
+                    { vi: "Xin lỗi vì đã làm phiền.", en: "Sorry for the inconvenience.", img: "https://images.unsplash.com/photo-1507679799987-c73779587ccf?w=300&auto=format&fit=crop&q=80" }
+                ]
+            }
+        ];
+
+        // App State
+        let currentChapterIndex = 0;
+        let currentSentenceIndex = 0;
+        let isFlipped = false;
+        let currentSentences = [];
+
+        // DOM Elements
+        const tabsContainer = document.getElementById('tabsContainer');
+        const flashcard = document.getElementById('flashcard');
+        const cardWrapper = document.getElementById('cardWrapper');
+        const vietnameseText = document.getElementById('vietnameseText');
+        const englishText = document.getElementById('englishText');
+        const cardImage = document.getElementById('cardImage');
+        const progressText = document.getElementById('progressText');
+        const chapterBadge = document.getElementById('chapterBadge');
+        
+        const flipBtn = document.getElementById('flipBtn');
+        const nextBtn = document.getElementById('nextBtn');
+        const prevBtn = document.getElementById('prevBtn');
+        const speakBtn = document.getElementById('speakBtn');
+        const cardSpeakBtn = document.getElementById('cardSpeakBtn');
+        const shuffleBtn = document.getElementById('shuffleBtn');
+        const resetProgressBtn = document.getElementById('resetProgressBtn');
+
+        // Initialize App
+        function initApp() {
+            loadSavedProgress();
+            renderTabs();
+            loadChapter(currentChapterIndex, false);
+            setupEventListeners();
+        }
+
+        // Save progress to LocalStorage
+        function saveProgress() {
+            const progress = {
+                chapterIndex: currentChapterIndex,
+                sentenceIndex: currentSentenceIndex
+            };
+            localStorage.setItem('camReflex_progress', JSON.stringify(progress));
+        }
+
+        // Load saved progress
+        function loadSavedProgress() {
+            const saved = localStorage.getItem('camReflex_progress');
+            if (saved) {
+                try {
+                    const parsed = JSON.parse(saved);
+                    if (parsed.chapterIndex >= 0 && parsed.chapterIndex < chaptersData.length) {
+                        currentChapterIndex = parsed.chapterIndex;
+                        currentSentenceIndex = parsed.sentenceIndex || 0;
+                    }
+                } catch (e) {
+                    console.error("Failed to load progress", e);
+                }
+            }
+        }
+
+        // Render 12 Horizontal Tabs
+        function renderTabs() {
+            tabsContainer.innerHTML = '';
+            chaptersData.forEach((chapter, index) => {
+                const button = document.createElement('button');
+                const isActive = index === currentChapterIndex;
+                
+                button.className = `px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold whitespace-nowrap transition-all duration-200 border flex items-center gap-1.5 ${
+                    isActive 
+                    ? 'bg-orangeTheme-500 text-white border-orangeTheme-500 shadow-sm shadow-orangeTheme-200' 
+                    : 'bg-white text-slate-700 border-orangeTheme-200 hover:bg-orangeTheme-100/60 hover:text-orangeTheme-800'
+                }`;
+                
+                button.innerHTML = `
+                    <span>Chương ${chapter.id}</span>
+                `;
+
+                button.addEventListener('click', () => {
+                    if (currentChapterIndex !== index) {
+                        currentChapterIndex = index;
+                        currentSentenceIndex = 0;
+                        loadChapter(currentChapterIndex);
+                        updateTabsState();
+                        saveProgress();
+                    }
+                });
+
+                tabsContainer.appendChild(button);
+            });
+        }
+
+        // Update Tabs active styles
+        function updateTabsState() {
+            Array.from(tabsContainer.children).forEach((tab, index) => {
+                const isActive = index === currentChapterIndex;
+                tab.className = `px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold whitespace-nowrap transition-all duration-200 border flex items-center gap-1.5 ${
+                    isActive 
+                    ? 'bg-orangeTheme-500 text-white border-orangeTheme-500 shadow-sm shadow-orangeTheme-200' 
+                    : 'bg-white text-slate-700 border-orangeTheme-200 hover:bg-orangeTheme-100/60 hover:text-orangeTheme-800'
+                }`;
+
+                if (isActive) {
+                    tab.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+                }
+            });
+        }
+
+        // Load Chapter Data
+        function loadChapter(index, resetSentence = true) {
+            const chapter = chaptersData[index];
+            currentSentences = [...chapter.sentences];
+            
+            if (resetSentence || currentSentenceIndex >= currentSentences.length) {
+                currentSentenceIndex = 0;
+            }
+
+            chapterBadge.innerText = `Chương ${chapter.id}`;
+            
+            resetCardFlip();
+            updateCardContent();
+        }
+
+        // Update Current Card Content
+        function updateCardContent() {
+            if (!currentSentences || currentSentences.length === 0) return;
+
+            const current = currentSentences[currentSentenceIndex];
+            vietnameseText.innerText = current.vi;
+            englishText.innerText = current.en;
+            
+            if (current.img) {
+                cardImage.src = current.img;
+            } else {
+                cardImage.src = 'https://placehold.co/300x300/ffedd5/c2410c?text=Camreflex';
+            }
+
+            progressText.innerText = `Câu ${currentSentenceIndex + 1} / ${currentSentences.length}`;
+
+            // Update prev/next buttons
+            prevBtn.disabled = currentSentenceIndex === 0;
+            prevBtn.style.opacity = currentSentenceIndex === 0 ? '0.5' : '1';
+
+            nextBtn.disabled = currentSentenceIndex === currentSentences.length - 1;
+            nextBtn.style.opacity = currentSentenceIndex === currentSentences.length - 1 ? '0.5' : '1';
+        }
+
+        // Toggle Card Flip
+        function toggleFlip() {
+            isFlipped = !isFlipped;
+            if (isFlipped) {
+                flashcard.classList.add('flipped');
+            } else {
+                flashcard.classList.remove('flipped');
+            }
+        }
+
+        function resetCardFlip() {
+            isFlipped = false;
+            flashcard.classList.remove('flipped');
+        }
+
+        // Text To Speech
+        function speakEnglish() {
+            if (!currentSentences[currentSentenceIndex]) return;
+
+            const text = currentSentences[currentSentenceIndex].en;
+            if ('speechSynthesis' in window) {
+                window.speechSynthesis.cancel();
+
+                const utterance = new SpeechSynthesisUtterance(text);
+                utterance.lang = 'en-US';
+                utterance.rate = 0.9;
+                
+                window.speechSynthesis.speak(utterance);
+            } else {
+                alert("Trình duyệt của bạn không hỗ trợ tính năng phát âm (Text-to-Speech).");
+            }
+        }
+
+        // Shuffle sentences
+        function shuffleSentences() {
+            for (let i = currentSentences.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [currentSentences[i], currentSentences[j]] = [currentSentences[j], currentSentences[i]];
+            }
+            currentSentenceIndex = 0;
+            resetCardFlip();
+            updateCardContent();
+            
+            shuffleBtn.classList.add('text-orangeTheme-600', 'rotate-180');
+            setTimeout(() => {
+                shuffleBtn.classList.remove('text-orangeTheme-600', 'rotate-180');
+            }, 300);
+        }
+
+        // Setup Event Listeners
+        function setupEventListeners() {
+            cardWrapper.addEventListener('click', (e) => {
+                if (e.target.closest('#cardSpeakBtn')) return;
+                toggleFlip();
+            });
+
+            flipBtn.addEventListener('click', toggleFlip);
+
+            nextBtn.addEventListener('click', () => {
+                if (currentSentenceIndex < currentSentences.length - 1) {
+                    currentSentenceIndex++;
+                    resetCardFlip();
+                    setTimeout(updateCardContent, 150);
+                    saveProgress();
+                }
+            });
+
+            prevBtn.addEventListener('click', () => {
+                if (currentSentenceIndex > 0) {
+                    currentSentenceIndex--;
+                    resetCardFlip();
+                    setTimeout(updateCardContent, 150);
+                    saveProgress();
+                }
+            });
+
+            speakBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                speakEnglish();
+            });
+
+            cardSpeakBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                speakEnglish();
+            });
+
+            shuffleBtn.addEventListener('click', shuffleSentences);
+
+            resetProgressBtn.addEventListener('click', () => {
+                if (confirm("Bạn có chắc chắn muốn đặt lại tiến độ về Chương 1 không?")) {
+                    localStorage.removeItem('camReflex_progress');
+                    currentChapterIndex = 0;
+                    currentSentenceIndex = 0;
+                    loadChapter(0);
+                    updateTabsState();
+                }
+            });
+
+            document.addEventListener('keydown', (e) => {
+                if (e.code === 'Space') {
+                    e.preventDefault();
+                    toggleFlip();
+                } else if (e.code === 'ArrowRight') {
+                    if (currentSentenceIndex < currentSentences.length - 1) {
+                        currentSentenceIndex++;
+                        resetCardFlip();
+                        setTimeout(updateCardContent, 150);
+                        saveProgress();
+                    }
+                } else if (e.code === 'ArrowLeft') {
+                    if (currentSentenceIndex > 0) {
+                        currentSentenceIndex--;
+                        resetCardFlip();
+                        setTimeout(updateCardContent, 150);
+                        saveProgress();
+                    }
+                }
+            });
+        }
+
+        window.addEventListener('DOMContentLoaded', initApp);
+    </script>
+</body>
+</html>
